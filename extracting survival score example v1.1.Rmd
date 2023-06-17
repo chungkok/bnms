@@ -1,0 +1,68 @@
+---
+title: "A Bayesian Network Risk Model for Predicting Survival Outcomes in Patients with Myeloma"
+subtitle: "Kelly Quek and Chung H Kok"
+output: html_document
+date: "2023-05-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Extract survival score from Bayesian network model
+
+In this tutorial, we will extract survival score using the example files provided. Load the necessary libraries.
+
+```{r library, echo=TRUE, message=FALSE, warning=FALSE}
+
+library(bnlearn)
+library(kableExtra)
+library(tidyverse)
+
+```
+
+## Reading the example data
+
+Load the example data which contains 469 filtered pathways on 762 samples.
+
+```{r data, echo=TRUE}
+dat <- read.csv(file="./data/MMRF example with pathway activity score.csv", row.names = 1)
+# head(dat)
+```
+
+Here is the list of 469 pathways. This list of pathways is also available in the repository.
+
+```{r pathways, echo=TRUE, paged.print=TRUE}
+
+pwy <- data.frame(pathways=names(dat))
+
+pwy %>% head(5) %>%
+  kbl() %>%
+  kable_minimal()
+
+```
+
+## Load the survival model
+
+Once we have the cancer hallmark pathways signature or activity score for each sample, we can load the Bayesian network myeloma survival model.
+
+```{r load_model, echo=TRUE}
+
+model <- readRDS(file="./database/BN_myeloma_survial_model.rds")
+
+```
+
+## Extract survival score
+
+The model will predict the survival score on this provided example dataset based on the pathway signature score.
+
+```{r prediction, echo=TRUE, paged.print=TRUE}
+
+pred_score = data.frame(SampleID=rownames(dat), 
+                        survival_score=predict(model, c("Vital_disease_status"), dat[, 1:dim(dat)[2]]))
+
+head(pred_score) %>%
+  kbl() %>%
+  kable_minimal()
+
+```
